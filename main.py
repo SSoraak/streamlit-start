@@ -8,31 +8,37 @@ import numpy as np
 
 # Load the data
 data_path = r'C:\Users\LOQ\OneDrive\Pose Health Care\MA (PPop)\สถิติ Pose Repairman.xlsx'
-df = pd.read_excel(data_path)
+df = pd.read_excel(data_path, sheet_name="ข้อมูลการใช้นำยา")
 
-# Preprocess the data: convert to numeric and drop rows with missing values
-df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'] = pd.to_numeric(df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'], errors='coerce')
-df.dropna()
+df = df.dropna()
 
 # Display DataFrame columns for debugging
-st.write("DataFrame Columns:")
-st.write(df.columns)
+#st.write("DataFrame Columns:")
+#st.write(df.columns)
+
+# Define column names
+department_column = 'แผนก'
+machine_id_column = 'หมายเลขเครื่อง'
+issue_column = 'ปัญหา'
+maintenance_duration_column = 'ระยะเวลาในใช้น้ำยา /แบต (วัน)'
+
+# Ensure correct column names and preprocessing
+if maintenance_duration_column in df.columns:
+    df[maintenance_duration_column] = pd.to_numeric(df[maintenance_duration_column], errors='coerce')
+    df.dropna(subset=[maintenance_duration_column], inplace=True)
+else:
+    st.error(f"Column '{maintenance_duration_column}' not found in the data.")
+    st.stop()
 
 # Streamlit app
 st.title("Machinery Maintenance Information and Prediction")
 
 # Display the data
 st.header("Maintenance Records")
-st.table(df)
-
-# Ensure correct column names
-department_column = 'แผนก'
-machine_id_column = 'หมายเลขเครื่อง'
-issue_column = 'ปัญหา'
-maintenance_duration_column = 'ระยะเวลาในใช้น้ำยา /แบต (วัน)'
+st.table(df.head(10))
 
 # One-hot encode the categorical features
-encoder = OneHotEncoder(sparse=False)
+encoder = OneHotEncoder(sparse_output=False)
 encoded_features = encoder.fit_transform(df[[department_column, issue_column]])
 
 # Create a DataFrame with the encoded features
@@ -82,7 +88,7 @@ if st.button("Predict"):
 
 # Filter by machine type
 st.sidebar.header("Filter by Machine Type")
-selected_machine_type = st.sidebar.selectbox("Select Machine Type", df['แผนก'].unique())
-filtered_data = df[df['แผนก'] == selected_machine_type]
+selected_machine_type = st.sidebar.selectbox("Select Machine Type", df[department_column].unique())
+filtered_data = df[df[department_column] == selected_machine_type]
 st.header(f"Records for Machine Type: {selected_machine_type}")
 st.table(filtered_data)
