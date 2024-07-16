@@ -62,6 +62,7 @@ rmse = np.sqrt(mse)
 
 # Display model performance
 st.header("Model Performance")
+st.write("**Scikit-learn Linear Regression Model**")
 st.write(f"Mean Absolute Error (MAE): {mae}")
 st.write(f"Mean Squared Error (MSE): {mse}")
 st.write(f"Root Mean Squared Error (RMSE): {rmse}")
@@ -83,6 +84,20 @@ st.write(f"Root Mean Squared Error (RMSE): {rmse_sm}")
 st.write("Statsmodels OLS Regression Summary")
 st.text(ols_model.summary())
 
+# Scikit-learn coefficients
+st.write("**Scikit-learn Linear Regression Equation**")
+sklearn_eq = f"y = {model.intercept_:.4f}"
+for coef, name in zip(model.coef_, X.columns):
+    sklearn_eq += f" + ({coef:.4f} * {name})"
+st.write(sklearn_eq)
+
+# Statsmodels coefficients
+st.write("**Statsmodels OLS Regression Equation**")
+params = ols_model.params
+statsmodels_eq = f"y = {params[0]:.4f}"
+for coef, name in zip(params[1:], X_train_sm.columns[1:]):
+    statsmodels_eq += f" + ({coef:.4f} * {name})"
+st.write(statsmodels_eq)
 
 # Predict for a new input
 st.header("Predict Time Until Maintenance Issue")
@@ -96,13 +111,14 @@ input_encoded = encoder.transform(input_data[[department_column, issue_column]])
 input_encoded_df = pd.DataFrame(input_encoded, columns=encoded_feature_names)
 input_final = pd.concat([input_data[[machine_id_column]], input_encoded_df], axis=1)
 
+
 if st.button("Predict"):
     # Prediction using sklearn model
     prediction = model.predict(input_final)
     st.write(f"Predicted Time Until Maintenance Issue (sklearn): {prediction[0]:.2f} days")
 
     # Prediction using statsmodels model
-    input_final_sm = sm.add_constant(input_final)
+    input_final_sm = np.squeeze(input_data)
     prediction_sm = ols_model.predict(input_final_sm)
     st.write(f"Predicted Time Until Maintenance Issue (statsmodels): {prediction_sm[0]:.2f} days")
 
