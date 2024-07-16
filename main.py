@@ -7,7 +7,7 @@ from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 
 # Load the data
-data_path = 'C:\Users\LOQ\OneDrive\Pose Health Care\MA (PPop)\สถิติ Pose Repairman.xlsx'  
+data_path = r'C:\Users\LOQ\OneDrive\Pose Health Care\MA (PPop)\สถิติ Pose Repairman.xlsx'  
 sheet_name = 'ข้อมูลการใช้นำยา'
 df = pd.read_excel(data_path, sheet_name=sheet_name)
 
@@ -20,6 +20,12 @@ st.title("Machinery Maintenance Information and Prediction")
 # Display the data
 st.header("Maintenance Records")
 st.table(df.head(10))
+
+# Define column names
+department_column = 'แผนก'
+machine_id_column = 'หมายเลขเครื่อง'
+issue_column = 'ปัญหา'
+maintenance_duration_column = 'ระยะเวลาในใช้น้ำยา /แบต (วัน)'
 
 # One-hot encode the categorical features
 encoder = OneHotEncoder(sparse_output=False)
