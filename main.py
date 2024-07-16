@@ -7,28 +7,12 @@ from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 
 # Load the data
-data_path = r'C:\Users\LOQ\OneDrive\Pose Health Care\MA (PPop)\สถิติ Pose Repairman.xlsx'
-df = pd.read_excel(data_path, sheet_name="ข้อมูลการใช้นำยา")
+data_path = 'C:\Users\LOQ\OneDrive\Pose Health Care\MA (PPop)\สถิติ Pose Repairman.xlsx'  
+sheet_name = 'ข้อมูลการใช้นำยา'
+df = pd.read_excel(data_path, sheet_name=sheet_name)
 
-df = df.dropna()
-
-# Display DataFrame columns for debugging
-#st.write("DataFrame Columns:")
-#st.write(df.colum
-
-# Define column names
-department_column = 'แผนก'
-machine_id_column = 'หมายเลขเครื่อง'
-issue_column = 'ปัญหา'
-maintenance_duration_column = 'ระยะเวลาในใช้น้ำยา /แบต (วัน)'
-
-# Ensure correct column names and preprocessing
-if maintenance_duration_column in df.columns:
-    df[maintenance_duration_column] = pd.to_numeric(df[maintenance_duration_column], errors='coerce')
-    df.dropna(subset=[maintenance_duration_column], inplace=True)
-else:
-    st.error(f"Column '{maintenance_duration_column}' not found in the data.")
-    st.stop()
+# Preprocess the data (convert to numeric)
+df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'] = pd.to_numeric(df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'], errors='coerce')
 
 # Streamlit app
 st.title("Machinery Maintenance Information and Prediction")
