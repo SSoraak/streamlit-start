@@ -48,9 +48,6 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 model = LinearRegression()
 model.fit(X_train, y_train)
 
-# Train the model using statsmodels
-X_train_sm = sm.add_constant(X_train)  # adding a constant
-ols_model = sm.OLS(y_train, X_train_sm).fit()
 
 # Make predictions using sklearn
 y_pred = model.predict(X_test)
@@ -67,44 +64,12 @@ st.write(f"Mean Absolute Error (MAE): {mae}")
 st.write(f"Mean Squared Error (MSE): {mse}")
 st.write(f"Root Mean Squared Error (RMSE): {rmse}")
 
-# Make predictions using statsmodels
-X_test_sm = sm.add_constant(X_test)
-y_pred_sm = ols_model.predict(X_test_sm)
-
-# Model evaluation using statsmodels
-mae_sm = mean_absolute_error(y_test, y_pred_sm)
-mse_sm = mean_squared_error(y_test, y_pred_sm)
-rmse_sm = np.sqrt(mse_sm)
-
-st.write("**Statsmodels OLS Regression Model**")
-st.write(f"Mean Absolute Error (MAE): {mae_sm}")
-st.write(f"Mean Squared Error (MSE): {mse_sm}")
-st.write(f"Root Mean Squared Error (RMSE): {rmse_sm}")
-
-st.write("Statsmodels OLS Regression Summary")
-st.text(ols_model.summary())
-
-# Scikit-learn coefficients
-st.write("**Scikit-learn Linear Regression Equation**")
-sklearn_eq = f"y = {model.intercept_:.4f}"
-for coef, name in zip(model.coef_, X.columns):
-    sklearn_eq += f" + ({coef:.4f} * {name})"
-st.write(sklearn_eq)
-
-# Statsmodels coefficients
-st.write("**Statsmodels OLS Regression Equation**")
-params = ols_model.params
-statsmodels_eq = f"y = {params[0]:.4f}"
-for coef, name in zip(params[1:], X_train_sm.columns[1:]):
-    statsmodels_eq += f" + ({coef:.4f} * {name})"
-st.write(statsmodels_eq)
 
 # Predict for a new input
 st.header("Predict Time Until Maintenance Issue")
 machine_id = st.number_input("Enter Machine ID:", min_value=int(df[machine_id_column].min()), max_value=int(df[machine_id_column].max()))
 selected_department = st.selectbox("Select Department", df[department_column].unique())
 selected_issue = st.selectbox("Select Issue", df[issue_column].unique())
-
 # Prepare the input data for prediction
 input_data = pd.DataFrame([[machine_id, selected_department, selected_issue]], columns=[machine_id_column, department_column, issue_column])
 input_encoded = encoder.transform(input_data[[department_column, issue_column]])
@@ -112,16 +77,24 @@ input_encoded_df = pd.DataFrame(input_encoded, columns=encoded_feature_names)
 input_final = pd.concat([input_data[[machine_id_column]], input_encoded_df], axis=1)
 
 
+
 if st.button("Predict"):
     # Prediction using sklearn model
     prediction = model.predict(input_final)
     st.write(f"Predicted Time Until Maintenance Issue (sklearn): {prediction[0]:.2f} days")
 
-    # Prediction using statsmodels model
-    input_final_sm = np.squeeze(input_data)
-    prediction_sm = ols_model.predict(input_final_sm)
-    st.write(f"Predicted Time Until Maintenance Issue (statsmodels): {prediction_sm[0]:.2f} days")
+df2 = pd.read_excel(data_path, sheet_name="แผนกที่ติดตั้ง Dispenser")
+# สร้าง DataFrame ที่ทำซ้ำข้อมูล และเพิ่มคอลัมน์ 'ปัญหา'
+df2= df2.loc[df2.index.repeat(2)].reset_index(drop=True)
+# Add a new column 'ปัญหา' with alternating values
+df2['ปัญหา'] = ['น้ำยาหมด', 'แบตเตอร์รี่หมด'] * (len(df2) // 2)
 
+st.header("Machine")
+st.table(df2.head(10))
+
+
+
+st.header("ผลการทำนาย")
 # Filter by machine type
 st.sidebar.header("Filter by Machine Type")
 selected_machine_type = st.sidebar.selectbox("Select Machine Type", df[department_column].unique())
