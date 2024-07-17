@@ -4,7 +4,7 @@
 pip install streamlit pandas scikit-learn numpy
 
 <<<<<<< HEAD
-pip install streamlit pandas scikit-learn xlrd openpyxl statsmodels
+pip install streamlit pandas scikit-learn xlrd openpyxl statsmodels matplotlib
 
 
 streamlit run main.py
