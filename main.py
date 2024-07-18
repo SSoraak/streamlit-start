@@ -9,21 +9,19 @@ from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+import plotly.express as px
 
 # Load the data
 data_path = r'สถิติ Pose Repairman.xlsx'
 sheet_name = 'ข้อมูลการใช้นำยา'
-df = pd.read_excel(data_path, sheet_name=sheet_name, engine='openpyxl' )
+df = pd.read_excel(data_path, sheet_name=sheet_name, engine='openpyxl')
 
 # Preprocess the data (convert to numeric)
 df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'] = pd.to_numeric(df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'], errors='coerce')
 
 # Streamlit app
 st.title("Machinery Maintenance Information and Prediction")
-
-# Display the data
-st.header("Maintenance Records")
-st.table(df.head(10))
 
 # Define column names
 department_column = 'แผนก'
@@ -60,6 +58,7 @@ models = {
 }
 
 model_results = {}
+predictions = {}
 
 for name, model in models.items():
     model.fit(X_train, y_train)
@@ -69,9 +68,8 @@ for name, model in models.items():
     rmse = np.sqrt(mse)
     r_squared = r2_score(y_test, y_pred)
 
-
     model_results[name] = {"R Squared": r_squared, "MAE": mae, "MSE": mse, "RMSE": rmse}
-
+    predictions[name] = y_pred
 
 # Time Series Forecasting using ARIMA
 # Prepare the time series data
@@ -86,7 +84,6 @@ arima_model_fit = arima_model.fit()
 arima_forecast = arima_model_fit.forecast(steps=10)
 arima_rmse = np.sqrt(mean_squared_error(ts_data.values, arima_model_fit.fittedvalues))
 
-
 # Display model performance
 st.header("Model Performance")
 for name, metrics in model_results.items():
@@ -97,17 +94,26 @@ for name, metrics in model_results.items():
     st.write(f"Root Mean Squared Error (RMSE): {metrics['RMSE']}")
     st.write("---")
 
-#st.write("**ARIMA Model**")
-#st.write(f"Root Mean Squared Error (RMSE): {arima_rmse}")
+# Plot predictions from all four models vs actual values
+fig = go.Figure()
 
-# Visualize the ARIMA forecast
-#st.header("ARIMA Forecast")
-#fig, ax = plt.subplots()
-#ts_data.plot(ax=ax, label='Observed', legend=True)
-#arima_model_fit.fittedvalues.plot(ax=ax, style='--', color='red', label='Fitted')
-#arima_forecast.plot(ax=ax, style='--', color='green', label='Forecast')
-#plt.legend()
-#st.pyplot(fig)
+# Add actual values
+fig.add_trace(go.Scatter(x=list(range(len(y_test))), y=y_test, mode='lines', name='Actual Values'))
+
+# Add predictions for each model
+colors = ['red', 'green', 'blue', 'orange']
+for idx, (name, y_pred) in enumerate(predictions.items()):
+    fig.add_trace(go.Scatter(x=list(range(len(y_pred))), y=y_pred, mode='lines', name=f'{name} Predictions', line=dict(color=colors[idx])))
+
+fig.update_layout(
+    title="Model Predictions vs Actual Values",
+    xaxis_title="Sample Index",
+    yaxis_title="Maintenance Duration (days)",
+    legend_title="Legend",
+    template="plotly_white"
+)
+
+st.plotly_chart(fig)
 
 # Predict for a new input
 st.header("Predict Time Until Maintenance Issue")
@@ -121,13 +127,12 @@ input_encoded = encoder.transform(input_data[[department_column, issue_column]])
 input_encoded_df = pd.DataFrame(input_encoded, columns=encoded_feature_names)
 input_final = pd.concat([input_data[[machine_id_column]], input_encoded_df], axis=1)
 
-
 if st.button("Predict"):
     predictions = {name: model.predict(input_final)[0] for name, model in models.items()}
     for name, prediction in predictions.items():
         st.write(f"**{name} Prediction**: {prediction:.0f} days")
-# Predict and add predictions to the DataFrame
 
+# Predict and add predictions to the DataFrame
 def predict_maintenance_duration(row):
     input_data = pd.DataFrame([[row[machine_id_column], row[department_column], row[issue_column]]], 
                               columns=[machine_id_column, department_column, issue_column])
@@ -139,15 +144,13 @@ def predict_maintenance_duration(row):
 
 df['Predicted Maintenance Duration (days)'] = df.apply(predict_maintenance_duration, axis=1).astype(int)
 
-# Display the updated DataFrame with predictions
-#st.header("Maintenance Records with Predictions")
-#st.table(df.drop_duplicates())
 
 # Convert date column to datetime (assuming date column is 'วันที่')
 df['วันที่'] = pd.to_datetime(df['วันที่'], errors='coerce')
 df['วันที่'] = df['วันที่'].dt.date
 # Sort by date and remove duplicates, keeping the most recent
 df = df.sort_values(by='วันที่').drop_duplicates(subset=['แผนก', 'หมายเลขเครื่อง', 'ปัญหา'], keep='last')
+
 # Calculate the dates for the next day
 df['Predicted next date'] = df['วันที่'] + pd.to_timedelta(df['Predicted Maintenance Duration (days)'], unit='d')
 
@@ -178,9 +181,22 @@ if selected_department_type != 'All':
 if selected_machine_type != 'All':
     filtered_data = filtered_data[filtered_data[machine_id_column] == selected_machine_type]
 
+
 # Display header and filtered data
 st.header(f"Records for Machine: {selected_machine_type}  Issue: {selected_Issue_type} Department: {selected_department_type}")
-st.table(filtered_data)
+st.table(filtered_data.reset_index(drop=True))
 
+# Interactive graphs
+#st.header("Interactive Graphs")
 
+# Number of issues per month
+#df['เดือน'] = df['วันที่'].dt.to_period('M').astype(str)
+#issue_count_per_month = df.groupby(['เดือน', issue_column]).size().reset_index(name='count')
+#fig1 = px.bar(issue_count_per_month, x='เดือน', y='count', color=issue_column, title='Number of Issues per Month')
+#st.plotly_chart(fig1)
+
+# Average maintenance duration per department
+#avg_duration_per_department = df.groupby(department_column)[maintenance_duration_column].mean().reset_index()
+#fig2 = px.bar(avg_duration_per_department, x=department_column, y=maintenance_duration_column, title='Average Maintenance Duration per Department')
+#st.plotly_chart(fig2) 
 
