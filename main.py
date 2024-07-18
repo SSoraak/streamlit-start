@@ -130,7 +130,7 @@ input_final = pd.concat([input_data[[machine_id_column]], input_encoded_df], axi
 if st.button("Predict"):
     predictions = {name: model.predict(input_final)[0] for name, model in models.items()}
     for name, prediction in predictions.items():
-        st.write(f"**{name} Prediction**: {prediction:.0f} days")
+        st.info(f"**{name} Prediction**: {prediction:.0f} days")
 
 # Predict and add predictions to the DataFrame
 def predict_maintenance_duration(row):
