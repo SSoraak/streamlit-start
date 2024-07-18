@@ -11,7 +11,7 @@ from statsmodels.tsa.arima.model import ARIMA
 import matplotlib.pyplot as plt
 
 # Load the data
-data_path = 'https://github.com/SSoraak/streamlit-start/blob/main/%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4%20Pose%20Repairman.xlsx'
+data_path = r'สถิติ Pose Repairman.xlsx'
 sheet_name = 'ข้อมูลการใช้นำยา'
 df = pd.read_excel(data_path, sheet_name=sheet_name, engine='openpyxl' )
 
@@ -88,19 +88,19 @@ for name, metrics in model_results.items():
     st.write(f"Mean Squared Error (MSE): {metrics['MSE']}")
     st.write(f"Root Mean Squared Error (RMSE): {metrics['RMSE']}")
     st.write("---")
-""" 
-st.write("**ARIMA Model**")
-st.write(f"Root Mean Squared Error (RMSE): {arima_rmse}")
+
+#st.write("**ARIMA Model**")
+#st.write(f"Root Mean Squared Error (RMSE): {arima_rmse}")
 
 # Visualize the ARIMA forecast
-st.header("ARIMA Forecast")
-fig, ax = plt.subplots()
-ts_data.plot(ax=ax, label='Observed', legend=True)
-arima_model_fit.fittedvalues.plot(ax=ax, style='--', color='red', label='Fitted')
-arima_forecast.plot(ax=ax, style='--', color='green', label='Forecast')
-plt.legend()
-st.pyplot(fig)
-"""
+#st.header("ARIMA Forecast")
+#fig, ax = plt.subplots()
+#ts_data.plot(ax=ax, label='Observed', legend=True)
+#arima_model_fit.fittedvalues.plot(ax=ax, style='--', color='red', label='Fitted')
+#arima_forecast.plot(ax=ax, style='--', color='green', label='Forecast')
+#plt.legend()
+#st.pyplot(fig)
+
 # Predict for a new input
 st.header("Predict Time Until Maintenance Issue")
 machine_id = st.number_input("Enter Machine ID:", min_value=int(df[machine_id_column].min()), max_value=int(df[machine_id_column].max()))
@@ -113,7 +113,6 @@ input_encoded = encoder.transform(input_data[[department_column, issue_column]])
 input_encoded_df = pd.DataFrame(input_encoded, columns=encoded_feature_names)
 input_final = pd.concat([input_data[[machine_id_column]], input_encoded_df], axis=1)
 
-st.table(input_final)
 
 if st.button("Predict"):
     predictions = {name: model.predict(input_final)[0] for name, model in models.items()}
@@ -133,14 +132,23 @@ def predict_maintenance_duration(row):
 df['Predicted Maintenance Duration (days)'] = df.apply(predict_maintenance_duration, axis=1)
 
 # Display the updated DataFrame with predictions
-st.header("Maintenance Records with Predictions")
-st.table(df.drop_duplicates())
+#st.header("Maintenance Records with Predictions")
+#st.table(df.drop_duplicates())
 
-# Filter by machine type
+# Convert date column to datetime (assuming date column is 'วันที่')
+df['วันที่'] = pd.to_datetime(df['วันที่'], errors='coerce')
+
+# Sort by date and remove duplicates, keeping the most recent
+df = df.sort_values(by='วันที่').drop_duplicates(subset=['แผนก', 'หมายเลขเครื่อง', 'ปัญหา'], keep='last')
+
+# Filter 
 st.sidebar.header("Filter")
-selected_machine_type = st.sidebar.selectbox("Select Machine Type", df[department_column].unique())
 selected_Issue_type = st.sidebar.selectbox("Select Issue Type", df[issue_column].unique())
-filtered_data = (df[(df[department_column] == selected_machine_type) & (df[issue_column]==selected_Issue_type)])
-st.header(f"Records for Machine Type: {selected_machine_type} and Isuse Type: {selected_Issue_type}")
+selected_department_type = st.sidebar.selectbox("Select Department Type", df[department_column].unique())
+selected_machine_type = st.sidebar.selectbox("Select Machine Type", df[machine_id_column].unique())
+
+filtered_data = (df[(df[department_column] == selected_department_type) & (df[issue_column]==selected_Issue_type) & (df[machine_id_column]==selected_machine_type)])
+st.header(f"Records for Machine: {selected_machine_type}  Isuse: {selected_Issue_type} Department: {selected_department_type}")
 st.table(filtered_data)
+
 
