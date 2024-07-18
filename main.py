@@ -141,14 +141,35 @@ df['วันที่'] = pd.to_datetime(df['วันที่'], errors='coer
 # Sort by date and remove duplicates, keeping the most recent
 df = df.sort_values(by='วันที่').drop_duplicates(subset=['แผนก', 'หมายเลขเครื่อง', 'ปัญหา'], keep='last')
 
-# Filter 
+# Sidebar for filters
 st.sidebar.header("Filter")
-selected_Issue_type = st.sidebar.selectbox("Select Issue Type", df[issue_column].unique())
-selected_department_type = st.sidebar.selectbox("Select Department Type", df[department_column].unique())
-selected_machine_type = st.sidebar.selectbox("Select Machine Type", df[machine_id_column].unique())
 
-filtered_data = (df[(df[department_column] == selected_department_type) & (df[issue_column]==selected_Issue_type) & (df[machine_id_column]==selected_machine_type)])
-st.header(f"Records for Machine: {selected_machine_type}  Isuse: {selected_Issue_type} Department: {selected_department_type}")
+# Select Issue Type with 'All' option
+issue_types = ['All'] + list(df[issue_column].unique())
+selected_Issue_type = st.sidebar.selectbox("Select Issue Type", issue_types)
+
+# Select Department Type with 'All' option
+department_types = ['All'] + list(df[department_column].unique())
+selected_department_type = st.sidebar.selectbox("Select Department Type", department_types)
+
+# Dynamic Machine Type based on selected Department
+if selected_department_type == 'All':
+    machine_options = ['All'] + list(df[machine_id_column].unique())
+else:
+    machine_options = ['All'] + list(df[df[department_column] == selected_department_type][machine_id_column].unique())
+selected_machine_type = st.sidebar.selectbox("Select Machine Type", machine_options)
+
+# Apply filters to the DataFrame
+filtered_data = df.copy()
+if selected_Issue_type != 'All':
+    filtered_data = filtered_data[filtered_data[issue_column] == selected_Issue_type]
+if selected_department_type != 'All':
+    filtered_data = filtered_data[filtered_data[department_column] == selected_department_type]
+if selected_machine_type != 'All':
+    filtered_data = filtered_data[filtered_data[machine_id_column] == selected_machine_type]
+
+# Display header and filtered data
+st.header(f"Records for Machine: {selected_machine_type}  Issue: {selected_Issue_type} Department: {selected_department_type}")
 st.table(filtered_data)
 
 
