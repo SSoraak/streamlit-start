@@ -87,7 +87,7 @@ arima_rmse = np.sqrt(mean_squared_error(ts_data.values, arima_model_fit.fittedva
 # Display model performance
 st.header("Model Performance")
 for name, metrics in model_results.items():
-    st.write(f"**{name}**")
+    st.info(f"**{name}**")
     st.write(f"R Squared: {metrics['R Squared']}")
     st.write(f"Mean Absolute Error (MAE): {metrics['MAE']}")
     st.write(f"Mean Squared Error (MSE): {metrics['MSE']}")
@@ -184,6 +184,7 @@ if selected_machine_type != 'All':
 
 # Display header and filtered data
 st.header(f"Records for Machine: {selected_machine_type}  Issue: {selected_Issue_type} Department: {selected_department_type}")
+st.info("Gradient Boosting Model")
 st.table(filtered_data.reset_index(drop=True))
 
 # Interactive graphs
