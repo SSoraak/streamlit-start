@@ -43,8 +43,13 @@ encoded_df = pd.DataFrame(encoded_features, columns=encoded_feature_names)
 X = pd.concat([df[[machine_id_column]], encoded_df], axis=1)
 y = df[maintenance_duration_column]
 
+# Binarize the target variable for classification (using a threshold)
+threshold = y.median()
+y_binary = (y >= threshold).astype(int)
+
 # Train-test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train_bin, X_test_bin, y_train_bin, y_test_bin = train_test_split(X, y_binary, test_size=0.2, random_state=42)
 
 # Train the models
 models = {
@@ -63,7 +68,10 @@ for name, model in models.items():
     mse = mean_squared_error(y_test, y_pred)
     rmse = np.sqrt(mse)
     r_squared = r2_score(y_test, y_pred)
+
+
     model_results[name] = {"R Squared": r_squared, "MAE": mae, "MSE": mse, "RMSE": rmse}
+
 
 # Time Series Forecasting using ARIMA
 # Prepare the time series data
@@ -117,7 +125,7 @@ input_final = pd.concat([input_data[[machine_id_column]], input_encoded_df], axi
 if st.button("Predict"):
     predictions = {name: model.predict(input_final)[0] for name, model in models.items()}
     for name, prediction in predictions.items():
-        st.write(f"**{name} Prediction**: {prediction:.2f} days")
+        st.write(f"**{name} Prediction**: {prediction:.0f} days")
 # Predict and add predictions to the DataFrame
 
 def predict_maintenance_duration(row):
@@ -129,7 +137,7 @@ def predict_maintenance_duration(row):
     prediction = model.predict(input_final)
     return prediction[0]
 
-df['Predicted Maintenance Duration (days)'] = df.apply(predict_maintenance_duration, axis=1)
+df['Predicted Maintenance Duration (days)'] = df.apply(predict_maintenance_duration, axis=1).astype(int)
 
 # Display the updated DataFrame with predictions
 #st.header("Maintenance Records with Predictions")
@@ -137,9 +145,11 @@ df['Predicted Maintenance Duration (days)'] = df.apply(predict_maintenance_durat
 
 # Convert date column to datetime (assuming date column is 'วันที่')
 df['วันที่'] = pd.to_datetime(df['วันที่'], errors='coerce')
-
+df['วันที่'] = df['วันที่'].dt.date
 # Sort by date and remove duplicates, keeping the most recent
 df = df.sort_values(by='วันที่').drop_duplicates(subset=['แผนก', 'หมายเลขเครื่อง', 'ปัญหา'], keep='last')
+# Calculate the dates for the next day
+df['Predicted next date'] = df['วันที่'] + pd.to_timedelta(df['Predicted Maintenance Duration (days)'], unit='d')
 
 # Sidebar for filters
 st.sidebar.header("Filter Records for Machine")
@@ -171,5 +181,6 @@ if selected_machine_type != 'All':
 # Display header and filtered data
 st.header(f"Records for Machine: {selected_machine_type}  Issue: {selected_Issue_type} Department: {selected_department_type}")
 st.table(filtered_data)
+
 
 
