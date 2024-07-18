@@ -142,7 +142,7 @@ df['วันที่'] = pd.to_datetime(df['วันที่'], errors='coer
 df = df.sort_values(by='วันที่').drop_duplicates(subset=['แผนก', 'หมายเลขเครื่อง', 'ปัญหา'], keep='last')
 
 # Sidebar for filters
-st.sidebar.header("Filter")
+st.sidebar.header("Filter Records for Machine")
 
 # Select Issue Type with 'All' option
 issue_types = ['All'] + list(df[issue_column].unique())
