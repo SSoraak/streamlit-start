@@ -11,9 +11,9 @@ from statsmodels.tsa.arima.model import ARIMA
 import matplotlib.pyplot as plt
 
 # Load the data
-data_path = r'C:\Users\LOQ\OneDrive\Pose Health Care\MA (PPop)\สถิติ Pose Repairman.xlsx'
+data_path = 'https://github.com/SSoraak/streamlit-start/blob/main/%E0%B8%AA%E0%B8%96%E0%B8%B4%E0%B8%95%E0%B8%B4%20Pose%20Repairman.xlsx'
 sheet_name = 'ข้อมูลการใช้นำยา'
-df = pd.read_excel(data_path, sheet_name=sheet_name)
+df = pd.read_excel(data_path, sheet_name=sheet_name, engine='openpyxl' )
 
 # Preprocess the data (convert to numeric)
 df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'] = pd.to_numeric(df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'], errors='coerce')
