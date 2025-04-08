@@ -164,7 +164,7 @@ display_data = filtered_data.rename(columns={
 })
 
 # เลือกคอลัมน์ที่ต้องการแสดง
-display_columns = ['Date', 'Machine ID', 'Issue', 'Actual Duration (days)', 'Predicted Duration (days)', 'Next Predicted Date', 'Department']
+display_columns = [ 'Machine ID', 'Issue', 'Actual Duration (days)', 'Date', 'Next Predicted Date', 'Department']
 display_data = display_data[display_columns]
 
 # เพิ่ม CSS เพื่อปรับแต่งตาราง
