@@ -124,7 +124,8 @@ def predict_all_data(_df, _encoder, _model):
 
 # ใช้ Gradient Boosting เป็นโมเดลหลักสำหรับการพยากรณ์ทั้งหมด
 df['Predicted Maintenance Duration (days)'] = predict_all_data(df, encoder, models["Gradient Boosting"])
-df['Predicted next date'] = pd.to_datetime(df['วันที่']) + pd.to_timedelta(df['Predicted Maintenance Duration (days)'], unit='d').dt.date
+df['Predicted next date'] = pd.to_datetime(df['วันที่']) + pd.to_timedelta(df['Predicted Maintenance Duration (days)'], unit='d')
+df['Predicted next date'] = df['Predicted next date'].dt.date
 df = df.sort_values(by='วันที่').drop_duplicates(subset=[department_column, machine_id_column, issue_column], keep='last')
 df.to_csv('predict.csv', index=False, encoding='utf-8-sig')
 
