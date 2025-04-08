@@ -1,204 +1,105 @@
 import streamlit as st
 import pandas as pd
-from sklearn.model_selection import train_test_split
+import plotly.express as px
+import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 from sklearn.preprocessing import OneHotEncoder
-import numpy as np
-from statsmodels.tsa.arima.model import ARIMA
-import matplotlib.pyplot as plt
-import plotly.graph_objects as go
-import plotly.express as px
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
-# Load the data
-data_path = r'สถิติ Pose Repairman.xlsx'
-sheet_name = 'ข้อมูลการใช้นำยา'
-df = pd.read_excel(data_path, sheet_name=sheet_name, engine='openpyxl')
+st.set_page_config(page_title="Predictive Maintenance", layout="wide")
+st.title("📈 การพยากรณ์วันหมดอายุของน้ำยา")
 
-# Preprocess the data (convert to numeric)
-df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'] = pd.to_numeric(df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'], errors='coerce')
+# Load data and cache it
+@st.cache_data
+def load_data():
+    data_path = 'สถิติ Pose Repairman.xlsx'
+    sheet_name = 'ข้อมูลการใช้นำยา'
+    df = pd.read_excel(data_path, sheet_name=sheet_name, engine='openpyxl')
+    df['วันที่เติมน้ำยา'] = pd.to_datetime(df['วันที่เติมน้ำยา'])
+    return df
 
-# Streamlit app
-st.title("Machinery Maintenance Information and Prediction1")
+# Train multiple models and cache them
+@st.cache_resource
+def train_models(df):
+    df = df.dropna(subset=['อุปกรณ์', 'น้ำยา', 'อัตราการใช้งาน (วัน)'])
+    encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
+    X = encoder.fit_transform(df[['อุปกรณ์', 'น้ำยา']])
+    y = df['อัตราการใช้งาน (วัน)']
 
-# Define column names
-department_column = 'แผนก'
-machine_id_column = 'หมายเลขเครื่อง'
-issue_column = 'ปัญหา'
-maintenance_duration_column = 'ระยะเวลาในใช้น้ำยา /แบต (วัน)'
+    models = {
+        "Linear Regression": LinearRegression(),
+        "Decision Tree": DecisionTreeRegressor(random_state=42),
+        "Random Forest": RandomForestRegressor(random_state=42),
+        "Gradient Boosting": GradientBoostingRegressor(random_state=42)
+    }
 
-# One-hot encode the categorical features
-encoder = OneHotEncoder(sparse_output=False)
-encoded_features = encoder.fit_transform(df[[department_column, issue_column]])
+    for name in models:
+        models[name].fit(X, y)
 
-# Create a DataFrame with the encoded features
-encoded_feature_names = encoder.get_feature_names_out([department_column, issue_column])
-encoded_df = pd.DataFrame(encoded_features, columns=encoded_feature_names)
+    return models, encoder
 
-# Combine the encoded features with the numeric feature
-X = pd.concat([df[[machine_id_column]], encoded_df], axis=1)
-y = df[maintenance_duration_column]
+# Predict maintenance duration for new data
+def predict_all_models(new_df, models, encoder):
+    X_new = encoder.transform(new_df[['อุปกรณ์', 'น้ำยา']])
+    predictions = {}
+    for name, model in models.items():
+        predictions[name] = model.predict(X_new)
+    return predictions
 
-# Binarize the target variable for classification (using a threshold)
-threshold = y.median()
-y_binary = (y >= threshold).astype(int)
+# Main logic
+raw_df = load_data()
+models, encoder = train_models(raw_df)
 
-# Train-test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-X_train_bin, X_test_bin, y_train_bin, y_test_bin = train_test_split(X, y_binary, test_size=0.2, random_state=42)
+# User filters
+with st.sidebar:
+    st.header("🔍 ตัวกรองข้อมูล")
+    selected_equipment = st.multiselect("เลือกอุปกรณ์", raw_df['อุปกรณ์'].unique(), default=raw_df['อุปกรณ์'].unique())
+    selected_chemical = st.multiselect("เลือกน้ำยา", raw_df['น้ำยา'].unique(), default=raw_df['น้ำยา'].unique())
 
-# Train the models
-models = {
-    "Linear Regression": LinearRegression(),
-    "Decision Tree": DecisionTreeRegressor(random_state=42),
-    "Random Forest": RandomForestRegressor(random_state=42),
-    "Gradient Boosting": GradientBoostingRegressor(random_state=42)
-}
+# Filtered data
+filtered_df = raw_df[
+    (raw_df['อุปกรณ์'].isin(selected_equipment)) &
+    (raw_df['น้ำยา'].isin(selected_chemical))
+]
 
-model_results = {}
-predictions = {}
+# Prediction
+if not filtered_df.empty:
+    filtered_df = filtered_df.copy()
+    all_predictions = predict_all_models(filtered_df, models, encoder)
 
-for name, model in models.items():
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
-    mae = mean_absolute_error(y_test, y_pred)
-    mse = mean_squared_error(y_test, y_pred)
-    rmse = np.sqrt(mse)
-    r_squared = r2_score(y_test, y_pred)
+    error_summary = []
 
-    model_results[name] = {"R Squared": r_squared, "MAE": mae, "MSE": mse, "RMSE": rmse}
-    predictions[name] = y_pred
+    for name, preds in all_predictions.items():
+        filtered_df[f'{name} (วัน)'] = np.round(preds).astype(int)
+        filtered_df[f'{name} วันหมดอายุ'] = filtered_df['วันที่เติมน้ำยา'] + pd.to_timedelta(filtered_df[f'{name} (วัน)'], unit='D')
 
-# Time Series Forecasting using ARIMA
-# Prepare the time series data
-ts_data = df[['หมายเลขเครื่อง', 'ระยะเวลาในใช้น้ำยา /แบต (วัน)']].copy()
-ts_data = ts_data.groupby('หมายเลขเครื่อง').sum()
+        # Calculate error metrics
+        mae = mean_absolute_error(filtered_df['อัตราการใช้งาน (วัน)'], preds)
+        rmse = np.sqrt(mean_squared_error(filtered_df['อัตราการใช้งาน (วัน)'], preds))
+        error_summary.append({"Model": name, "MAE": mae, "RMSE": rmse})
 
-# Train the ARIMA model
-arima_model = ARIMA(ts_data, order=(5, 1, 0))
-arima_model_fit = arima_model.fit()
+    st.success(f"พบข้อมูล {len(filtered_df)} รายการ")
+    st.dataframe(filtered_df[[
+        'อุปกรณ์', 'น้ำยา', 'วันที่เติมน้ำยา', 'อัตราการใช้งาน (วัน)'
+    ] + [col for col in filtered_df.columns if any(m in col for m in models.keys())]]
+    .sort_values(by='วันที่เติมน้ำยา'))
 
-# Make predictions
-arima_forecast = arima_model_fit.forecast(steps=10)
-arima_rmse = np.sqrt(mean_squared_error(ts_data.values, arima_model_fit.fittedvalues))
+    st.subheader("📊 ค่าความคลาดเคลื่อนของแต่ละโมเดล")
+    st.dataframe(pd.DataFrame(error_summary).sort_values(by="RMSE"))
 
-# Display model performance
-st.header("Model Performance")
-for name, metrics in model_results.items():
-    st.info(f"**{name}**")
-    st.write(f"R Squared: {metrics['R Squared']}")
-    st.write(f"Mean Absolute Error (MAE): {metrics['MAE']}")
-    st.write(f"Mean Squared Error (MSE): {metrics['MSE']}")
-    st.write(f"Root Mean Squared Error (RMSE): {metrics['RMSE']}")
-    st.write("---")
-
-# Plot predictions from all four models vs actual values
-fig = go.Figure()
-
-# Add actual values
-fig.add_trace(go.Scatter(x=list(range(len(y_test))), y=y_test, mode='lines', name='Actual Values'))
-
-# Add predictions for each model
-colors = ['red', 'green', 'blue', 'orange']
-for idx, (name, y_pred) in enumerate(predictions.items()):
-    fig.add_trace(go.Scatter(x=list(range(len(y_pred))), y=y_pred, mode='lines', name=f'{name} Predictions', line=dict(color=colors[idx])))
-
-fig.update_layout(
-    title="Model Predictions vs Actual Values",
-    xaxis_title="Sample Index",
-    yaxis_title="Maintenance Duration (days)",
-    legend_title="Legend",
-    template="plotly_white"
-)
-
-st.plotly_chart(fig)
-
-# Predict for a new input
-st.header("Predict Time Until Maintenance Issue")
-machine_id = st.number_input("Enter Machine ID:", min_value=int(df[machine_id_column].min()), max_value=int(df[machine_id_column].max()))
-selected_department = st.selectbox("Select Department", df[department_column].unique())
-selected_issue = st.selectbox("Select Issue", df[issue_column].unique())
-
-# Prepare the input data for prediction
-input_data = pd.DataFrame([[machine_id, selected_department, selected_issue]], columns=[machine_id_column, department_column, issue_column])
-input_encoded = encoder.transform(input_data[[department_column, issue_column]])
-input_encoded_df = pd.DataFrame(input_encoded, columns=encoded_feature_names)
-input_final = pd.concat([input_data[[machine_id_column]], input_encoded_df], axis=1)
-
-if st.button("Predict"):
-    predictions = {name: model.predict(input_final)[0] for name, model in models.items()}
-    for name, prediction in predictions.items():
-        st.info(f"**{name} Prediction**: {prediction:.0f} days")
-
-# Predict and add predictions to the DataFrame
-def predict_maintenance_duration(row):
-    input_data = pd.DataFrame([[row[machine_id_column], row[department_column], row[issue_column]]], 
-                              columns=[machine_id_column, department_column, issue_column])
-    input_encoded = encoder.transform(input_data[[department_column, issue_column]])
-    input_encoded_df = pd.DataFrame(input_encoded, columns=encoded_feature_names)
-    input_final = pd.concat([input_data[[machine_id_column]], input_encoded_df], axis=1)
-    prediction = model.predict(input_final)
-    return prediction[0]
-
-df['Predicted Maintenance Duration (days)'] = df.apply(predict_maintenance_duration, axis=1).astype(int)
-
-
-# Convert date column to datetime (assuming date column is 'วันที่')
-df['วันที่'] = pd.to_datetime(df['วันที่'], errors='coerce')
-df['วันที่'] = df['วันที่'].dt.date
-# Sort by date and remove duplicates, keeping the most recent
-df = df.sort_values(by='วันที่').drop_duplicates(subset=['แผนก', 'หมายเลขเครื่อง', 'ปัญหา'], keep='last')
-
-# Calculate the dates for the next day
-df['Predicted next date'] = df['วันที่'] + pd.to_timedelta(df['Predicted Maintenance Duration (days)'], unit='d')
-df.to_csv('predict.csv', index=False, encoding='utf-8-sig')
-
-# Sidebar for filters
-st.sidebar.header("Filter Records for Machine")
-
-# Select Issue Type with 'All' option
-issue_types = ['All'] + list(df[issue_column].unique())
-selected_Issue_type = st.sidebar.selectbox("Select Issue Type", issue_types)
-
-# Select Department Type with 'All' option
-department_types = ['All'] + list(df[department_column].unique())
-selected_department_type = st.sidebar.selectbox("Select Department Type", department_types)
-
-# Dynamic Machine Type based on selected Department
-if selected_department_type == 'All':
-    machine_options = ['All'] + list(df[machine_id_column].unique())
+    for name in all_predictions:
+        st.subheader(f"📉 กราฟผลการพยากรณ์ ({name})")
+        fig = px.timeline(
+            filtered_df,
+            x_start='วันที่เติมน้ำยา',
+            x_end=f'{name} วันหมดอายุ',
+            y='อุปกรณ์',
+            color='น้ำยา',
+            title=f'ผลการพยากรณ์ ({name})'
+        )
+        fig.update_layout(xaxis_title='วันที่', yaxis_title='อุปกรณ์', height=600)
+        st.plotly_chart(fig, use_container_width=True)
 else:
-    machine_options = ['All'] + list(df[df[department_column] == selected_department_type][machine_id_column].unique())
-selected_machine_type = st.sidebar.selectbox("Select Machine Type", machine_options)
-
-# Apply filters to the DataFrame
-filtered_data = df.copy()
-if selected_Issue_type != 'All':
-    filtered_data = filtered_data[filtered_data[issue_column] == selected_Issue_type]
-if selected_department_type != 'All':
-    filtered_data = filtered_data[filtered_data[department_column] == selected_department_type]
-if selected_machine_type != 'All':
-    filtered_data = filtered_data[filtered_data[machine_id_column] == selected_machine_type]
-
-
-# Display header and filtered data
-st.header(f"Records for Machine: {selected_machine_type}  Issue: {selected_Issue_type} Department: {selected_department_type}")
-st.info("Gradient Boosting Model")
-st.table(filtered_data.reset_index(drop=True))
-
-# Interactive graphs
-#st.header("Interactive Graphs")
-
-# Number of issues per month
-#df['เดือน'] = df['วันที่'].dt.to_period('M').astype(str)
-#issue_count_per_month = df.groupby(['เดือน', issue_column]).size().reset_index(name='count')
-#fig1 = px.bar(issue_count_per_month, x='เดือน', y='count', color=issue_column, title='Number of Issues per Month')
-#st.plotly_chart(fig1)
-
-# Average maintenance duration per department
-#avg_duration_per_department = df.groupby(department_column)[maintenance_duration_column].mean().reset_index()
-#fig2 = px.bar(avg_duration_per_department, x=department_column, y=maintenance_duration_column, title='Average Maintenance Duration per Department')
-#st.plotly_chart(fig2) 
-
+    st.warning("ไม่พบข้อมูลที่ตรงกับเงื่อนไข")
