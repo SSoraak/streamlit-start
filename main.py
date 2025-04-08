@@ -31,42 +31,7 @@ st.markdown("""
         color: #333;
         margin-top: 20px;
     }
-    /* ปรับแต่งตาราง */
-    .dataframe {
-        font-size: 14px;
-        border-collapse: collapse;
-        width: 100%;
-    }
-    .dataframe th {
-        background-color: #4CAF50;
-        color: white;
-        padding: 10px;
-        text-align: center;
-    }
-    .dataframe td {
-        padding: 8px;
-        text-align: center;
-        border-bottom: 1px solid #ddd;
-    }
-    .dataframe tr:nth-child(even) {
-        background-color: #f2f2f2;
-    }
-    .dataframe tr:hover {
-        background-color: #ddd;
-    }
-    /* ปรับแต่ง st.info ในส่วน Predict */
-    .stAlert {
-        background-color: #e6f3ff;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 10px;
-        font-size: 16px;
-    }
-    .stAlert h3 {
-        color: #1a73e8;
-        font-size: 20px;
-        margin-bottom: 10px;
-    }
+
     </style>
 """, unsafe_allow_html=True)
 
