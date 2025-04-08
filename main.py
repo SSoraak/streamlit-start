@@ -17,7 +17,11 @@ def load_data():
     data_path = 'สถิติ Pose Repairman.xlsx'
     sheet_name = 'ข้อมูลการใช้นำยา'
     df = pd.read_excel(data_path, sheet_name=sheet_name, engine='openpyxl')
+
+    # เปลี่ยนชื่อคอลัมน์ให้ง่ายต่อการใช้งาน
+    df.rename(columns={'วันที่เติมน้ำยา (วัน/เดือน/ปี)': 'วันที่เติมน้ำยา'}, inplace=True)
     df['วันที่เติมน้ำยา'] = pd.to_datetime(df['วันที่เติมน้ำยา'])
+
     return df
 
 # Train multiple models and cache them
