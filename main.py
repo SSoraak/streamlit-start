@@ -60,7 +60,7 @@ encoded_df = pd.DataFrame(encoded_features, columns=encoded_feature_names)
 
 # รวมข้อมูล
 X = pd.concat([df[[machine_id_column]], encoded_df], axis=1)
-y = df[maintenance_duration_column].fillna(y.median())  # จัดการ NaN โดยใช้ median
+y = df[maintenance_duration_column].fillna(df[maintenance_duration_column].median())  # จัดการ NaN โดยใช้ median
 
 # แยกข้อมูล train-test
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
