@@ -154,13 +154,13 @@ st.info("Gradient Boosting Model")
 # ปรับแต่งตารางให้สวยงาม
 # เปลี่ยนชื่อคอลัมน์ให้สวยงามและอ่านง่าย
 display_data = filtered_data.rename(columns={
-    'วันที่': 'Date',
+    'แผนก': 'Department',
     'หมายเลขเครื่อง': 'Machine ID',
     'ปัญหา': 'Issue',
+    'วันที่': 'Date',
     'ระยะเวลาในใช้น้ำยา /แบต (วัน)': 'Actual Duration (days)',
-    'Predicted Maintenance Duration (days)': 'Predicted Duration (days)',
-    'Predicted next date': 'Next Predicted Date',
-    'แผนก': 'Department'
+    'Predicted next date': 'Next Predicted Date'
+    
 })
 
 # เลือกคอลัมน์ที่ต้องการแสดง
