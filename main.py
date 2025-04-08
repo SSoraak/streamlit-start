@@ -192,6 +192,10 @@ display_data = filtered_data.rename(columns={
 display_columns = [ 'Department', 'Machine ID', 'Issue', 'Actual Duration (days)', 'Date', 'Next Predicted Date' ]
 display_data = display_data[display_columns]
 
+# รีเซ็ตอินเดกซ์และเริ่มนับจาก 1
+display_data = display_data.reset_index(drop=True)  # รีเซ็ตอินเดกซ์
+display_data.index = display_data.index + 1  # เริ่มอินเดกซ์จาก 1
+
 # เพิ่ม CSS เพื่อปรับแต่งตาราง
 st.markdown("""
     <style>
