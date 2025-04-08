@@ -16,7 +16,7 @@ df = pd.read_excel(data_path, sheet_name=sheet_name)
 df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'] = pd.to_numeric(df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'], errors='coerce')
 
 # Streamlit app
-st.title("Machinery Maintenance Information and Prediction")
+st.title("Machinery Maintenance Information and Prediction2")
 
 # Display the data
 st.header("Maintenance Records")

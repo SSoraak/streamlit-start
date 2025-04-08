@@ -21,7 +21,7 @@ df = pd.read_excel(data_path, sheet_name=sheet_name, engine='openpyxl')
 df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'] = pd.to_numeric(df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'], errors='coerce')
 
 # Streamlit app
-st.title("Machinery Maintenance Information and Prediction")
+st.title("Machinery Maintenance Information and Prediction1")
 
 # Define column names
 department_column = 'แผนก'
@@ -153,6 +153,7 @@ df = df.sort_values(by='วันที่').drop_duplicates(subset=['แผน�
 
 # Calculate the dates for the next day
 df['Predicted next date'] = df['วันที่'] + pd.to_timedelta(df['Predicted Maintenance Duration (days)'], unit='d')
+df.to_csv('predict.csv', index=False, encoding='utf-8-sig')
 
 # Sidebar for filters
 st.sidebar.header("Filter Records for Machine")
