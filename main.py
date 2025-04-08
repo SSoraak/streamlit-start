@@ -10,6 +10,66 @@ import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
 import plotly.graph_objects as go
 
+# เพิ่ม CSS เพื่อขยายความกว้างของทุกส่วน
+st.markdown("""
+    <style>
+    /* ขยายความกว้างของ container หลัก */
+    .main .block-container {
+        max-width: 1400px;  /* ปรับความกว้างสูงสุดตามต้องการ */
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+    /* ปรับแต่ง st.title */
+    h1 {
+        font-size: 36px !important;
+        text-align: center;
+        color: #1a73e8;
+    }
+    /* ปรับแต่ง st.header */
+    h2 {
+        font-size: 28px !important;
+        color: #333;
+        margin-top: 20px;
+    }
+    /* ปรับแต่งตาราง */
+    .dataframe {
+        font-size: 14px;
+        border-collapse: collapse;
+        width: 100%;
+    }
+    .dataframe th {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px;
+        text-align: center;
+    }
+    .dataframe td {
+        padding: 8px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+    .dataframe tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    .dataframe tr:hover {
+        background-color: #ddd;
+    }
+    /* ปรับแต่ง st.info ในส่วน Predict */
+    .stAlert {
+        background-color: #e6f3ff;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+    .stAlert h3 {
+        color: #1a73e8;
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # แคชการโหลดข้อมูล
 @st.cache_data
 def load_data():
