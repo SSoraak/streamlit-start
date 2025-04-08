@@ -9,7 +9,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 st.set_page_config(page_title="Predictive Maintenance", layout="wide")
-st.title("📈 การพยากรณ์วันหมดอายุของน้ำยา")
+st.title("📈 การพยากรณ์วันหมดอายุของน้ำยา / แบตเตอรี่")
 
 # Load data and cache it
 @st.cache_data
@@ -17,19 +17,22 @@ def load_data():
     data_path = 'สถิติ Pose Repairman.xlsx'
     sheet_name = 'ข้อมูลการใช้นำยา'
     df = pd.read_excel(data_path, sheet_name=sheet_name, engine='openpyxl')
-
-    # เปลี่ยนชื่อคอลัมน์ให้ง่ายต่อการใช้งาน
-    df.rename(columns={'วันที่': 'วันที่เติมน้ำยา'}, inplace=True)
+    df.rename(columns={
+        'แผนก': 'แผนก',
+        'หมายเลขเครื่อง': 'หมายเลขเครื่อง',
+        'ปัญหา': 'ปัญหา',
+        'ระยะเวลาในใช้น้ำยา /แบต (วัน)': 'อัตราการใช้งาน (วัน)',
+        'วันที่': 'วันที่เติมน้ำยา'
+    }, inplace=True)
     df['วันที่เติมน้ำยา'] = pd.to_datetime(df['วันที่เติมน้ำยา'])
-
     return df
 
 # Train multiple models and cache them
 @st.cache_resource
 def train_models(df):
-    df = df.dropna(subset=['อุปกรณ์', 'น้ำยา', 'อัตราการใช้งาน (วัน)'])
+    df = df.dropna(subset=['แผนก', 'หมายเลขเครื่อง', 'ปัญหา', 'อัตราการใช้งาน (วัน)'])
     encoder = OneHotEncoder(sparse=False, handle_unknown='ignore')
-    X = encoder.fit_transform(df[['อุปกรณ์', 'น้ำยา']])
+    X = encoder.fit_transform(df[['แผนก', 'หมายเลขเครื่อง', 'ปัญหา']])
     y = df['อัตราการใช้งาน (วัน)']
 
     models = {
@@ -46,7 +49,7 @@ def train_models(df):
 
 # Predict maintenance duration for new data
 def predict_all_models(new_df, models, encoder):
-    X_new = encoder.transform(new_df[['อุปกรณ์', 'น้ำยา']])
+    X_new = encoder.transform(new_df[['แผนก', 'หมายเลขเครื่อง', 'ปัญหา']])
     predictions = {}
     for name, model in models.items():
         predictions[name] = model.predict(X_new)
@@ -59,13 +62,13 @@ models, encoder = train_models(raw_df)
 # User filters
 with st.sidebar:
     st.header("🔍 ตัวกรองข้อมูล")
-    selected_equipment = st.multiselect("เลือกอุปกรณ์", raw_df['อุปกรณ์'].unique(), default=raw_df['อุปกรณ์'].unique())
-    selected_chemical = st.multiselect("เลือกน้ำยา", raw_df['น้ำยา'].unique(), default=raw_df['น้ำยา'].unique())
+    selected_departments = st.multiselect("เลือกแผนก", raw_df['แผนก'].unique(), default=raw_df['แผนก'].unique())
+    selected_machines = st.multiselect("เลือกหมายเลขเครื่อง", raw_df['หมายเลขเครื่อง'].unique(), default=raw_df['หมายเลขเครื่อง'].unique())
 
 # Filtered data
 filtered_df = raw_df[
-    (raw_df['อุปกรณ์'].isin(selected_equipment)) &
-    (raw_df['น้ำยา'].isin(selected_chemical))
+    (raw_df['แผนก'].isin(selected_departments)) &
+    (raw_df['หมายเลขเครื่อง'].isin(selected_machines))
 ]
 
 # Prediction
@@ -86,7 +89,7 @@ if not filtered_df.empty:
 
     st.success(f"พบข้อมูล {len(filtered_df)} รายการ")
     st.dataframe(filtered_df[[
-        'อุปกรณ์', 'น้ำยา', 'วันที่เติมน้ำยา', 'อัตราการใช้งาน (วัน)'
+        'แผนก', 'หมายเลขเครื่อง', 'ปัญหา', 'วันที่เติมน้ำยา', 'อัตราการใช้งาน (วัน)'
     ] + [col for col in filtered_df.columns if any(m in col for m in models.keys())]]
     .sort_values(by='วันที่เติมน้ำยา'))
 
@@ -99,11 +102,11 @@ if not filtered_df.empty:
             filtered_df,
             x_start='วันที่เติมน้ำยา',
             x_end=f'{name} วันหมดอายุ',
-            y='อุปกรณ์',
-            color='น้ำยา',
+            y='หมายเลขเครื่อง',
+            color='แผนก',
             title=f'ผลการพยากรณ์ ({name})'
         )
-        fig.update_layout(xaxis_title='วันที่', yaxis_title='อุปกรณ์', height=600)
+        fig.update_layout(xaxis_title='วันที่', yaxis_title='หมายเลขเครื่อง', height=600)
         st.plotly_chart(fig, use_container_width=True)
 else:
     st.warning("ไม่พบข้อมูลที่ตรงกับเงื่อนไข")
