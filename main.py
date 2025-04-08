@@ -150,4 +150,50 @@ if selected_machine_type != 'All':
 # แสดงข้อมูลที่กรองแล้ว
 st.header(f"Records for Machine: {selected_machine_type}  Issue: {selected_issue_type} Department: {selected_department_type}")
 st.info("Gradient Boosting Model")
-st.table(filtered_data.reset_index(drop=True))
+
+# ปรับแต่งตารางให้สวยงาม
+# เปลี่ยนชื่อคอลัมน์ให้สวยงามและอ่านง่าย
+display_data = filtered_data.rename(columns={
+    'วันที่': 'Date',
+    'หมายเลขเครื่อง': 'Machine ID',
+    'ปัญหา': 'Issue',
+    'ระยะเวลาในใช้น้ำยา /แบต (วัน)': 'Actual Duration (days)',
+    'Predicted Maintenance Duration (days)': 'Predicted Duration (days)',
+    'Predicted next date': 'Next Predicted Date',
+    'แผนก': 'Department'
+})
+
+# เลือกคอลัมน์ที่ต้องการแสดง
+display_columns = ['Date', 'Machine ID', 'Issue', 'Actual Duration (days)', 'Predicted Duration (days)', 'Next Predicted Date', 'Department']
+display_data = display_data[display_columns]
+
+# เพิ่ม CSS เพื่อปรับแต่งตาราง
+st.markdown("""
+    <style>
+    .dataframe {
+        font-size: 14px;
+        border-collapse: collapse;
+        width: 100%;
+    }
+    .dataframe th {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px;
+        text-align: center;
+    }
+    .dataframe td {
+        padding: 8px;
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+    }
+    .dataframe tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    .dataframe tr:hover {
+        background-color: #ddd;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# แสดงตารางด้วย st.dataframe
+st.dataframe(display_data, use_container_width=True)
