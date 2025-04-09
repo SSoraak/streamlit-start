@@ -29,8 +29,8 @@ hide_streamlit_style = """
             padding-right: 1rem;
         }
         .css-18e3th9 {
-            padding-left: 0rem !important;
-            padding-right: 0rem !important;
+            padding-left: 3rem !important;
+            padding-right: 3rem !important;
         }
     </style>
 """
