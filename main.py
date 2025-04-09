@@ -9,26 +9,38 @@ from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 import plotly.graph_objects as go
 
-# ปรับ CSS ความกว้าง และฟอนต์
-st.markdown("""
+# ---------------------- CONFIG ----------------------
+st.set_page_config(
+    page_title="Machinery Maintenance System",
+    layout="wide",  # Full width
+    initial_sidebar_state="collapsed"
+)
+
+# ---------------------- STYLE -----------------------
+hide_streamlit_style = """
     <style>
-    .main .block-container {
-        max-width: 1400px;
-        padding-left: 20px;
-        padding-right: 20px;
-    }
-    h1 {
-        font-size: 36px !important;
-        text-align: center;
-        color: #1a73e8;
-    }
-    h2 {
-        font-size: 28px !important;
-        color: #333;
-        margin-top: 20px;
-    }
+        #MainMenu, header, footer {
+            visibility: hidden;
+        }
+        .block-container {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        .css-18e3th9 {
+            padding-left: 0rem !important;
+            padding-right: 0rem !important;
+        }
     </style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# ---------------------- PAGE NAVIGATION -----------------------
+page = st.selectbox("เลือกหน้า", ["Dashboard", "Prediction"], index=0)
+
+st.markdown("<h1 style='text-align: center;'>Machinery Maintenance System</h1>", unsafe_allow_html=True)
+
 
 # แคชข้อมูล
 @st.cache_data
@@ -75,7 +87,7 @@ if page == "📊 Dashboard":
     st.header("📊 Dashboard Overview")
     dashboard_url = "https://your-dashboard-url.com"  # <== ใส่ URL dashboard จริงตรงนี้
     st.markdown(f"""
-        <iframe title="ข้อมูลเครื่องจักร MA (ธีม)" width="1140" height="541.25" src="https://app.powerbi.com/reportEmbed?reportId=892b0a03-c03d-41d9-a3fd-79ac05cbca3d&autoAuth=true&ctid=1f23f2e8-f8b5-4438-a7d7-1d2d87dffcf3" frameborder="0" allowFullScreen="true"></iframe>
+        <iframe title="ข้อมูลเครื่องจักร MA (ธีม)" width="100%" height="100%" src="https://app.powerbi.com/reportEmbed?reportId=892b0a03-c03d-41d9-a3fd-79ac05cbca3d&autoAuth=true&ctid=1f23f2e8-f8b5-4438-a7d7-1d2d87dffcf3" frameborder="0" allowFullScreen="true"></iframe>
     """, unsafe_allow_html=True)
 
 elif page == "🔧 Predict Maintenance":
