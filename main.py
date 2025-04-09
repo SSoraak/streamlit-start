@@ -144,9 +144,28 @@ elif page == "🔧 Predict Maintenance":
     st.plotly_chart(fig)
 
     st.subheader("Predict for New Input")
-    machine_id = st.number_input("Enter Machine ID:", min_value=int(df[machine_id_column].min()), max_value=int(df[machine_id_column].max()))
-    selected_department = st.selectbox("Select Department", df[department_column].unique())
-    selected_issue = st.selectbox("Select Issue", df[issue_column].unique())
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        machine_id = st.number_input(
+            "Enter Machine ID:",
+            min_value=int(df[machine_id_column].min()),
+            max_value=int(df[machine_id_column].max())
+        )
+
+    with col2:
+        selected_department = st.selectbox(
+            "Select Department",
+            df[department_column].unique()
+        )
+
+    with col3:
+        selected_issue = st.selectbox(
+            "Select Issue",
+            df[issue_column].unique()
+        )
+
 
     if st.button("Predict"):
         input_data = pd.DataFrame([[machine_id, selected_department, selected_issue]], columns=[machine_id_column, department_column, issue_column])
