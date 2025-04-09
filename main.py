@@ -29,8 +29,8 @@ hide_streamlit_style = """
             padding-right: 1rem;
         }
         .css-18e3th9 {
-            padding-left: 3rem !important;
-            padding-right: 3rem !important;
+            padding-left: 0rem !important;
+            padding-right: 0rem !important;
         }
     </style>
 """
@@ -76,10 +76,12 @@ def predict_all_data(_df, _encoder, _model):
 # ---------------------
 # Navigation
 # ---------------------
+st.markdown("<h1 style='text-align: center;'>Machinery Maintenance </h1>", unsafe_allow_html=True)
+page = st.selectbox("เลือกหน้า", ["📊 Dashboard", "🔧 Predict Maintenance"])
 
-page = st.selectbox("เลือกหน้า", ["Dashboard", "Prediction"], index=0)
 
-st.markdown("<h1 style='text-align: center;'>Machinery Maintenance System</h1>", unsafe_allow_html=True)
+
+
 
 
 if page == "📊 Dashboard":
