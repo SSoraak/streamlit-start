@@ -124,12 +124,16 @@ elif page == "🔧 Predict Maintenance":
         predictions[name] = y_pred
 
     st.subheader("Model Performance")
-    for name, metrics in model_results.items():
-        st.info(f"**{name}**")
-        st.write(f"R Squared: {metrics['R Squared']:.4f}")
-        st.write(f"MAE: {metrics['MAE']:.2f}")
-        st.write(f"MSE: {metrics['MSE']:.2f}")
-        st.write(f"RMSE: {metrics['RMSE']:.2f}")
+
+    cols = st.columns(4)  # แบ่งเป็น 4 คอลัมน์
+
+    for i, (name, metrics) in enumerate(model_results.items()):
+        with cols[i % 4]:  # ใส่ทีละคอลัมน์
+            st.info(f"**{name}**")
+            st.write(f"R Squared: {metrics['R Squared']:.4f}")
+            st.write(f"MAE: {metrics['MAE']:.2f}")
+            st.write(f"MSE: {metrics['MSE']:.2f}")
+            st.write(f"RMSE: {metrics['RMSE']:.2f}")
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=list(range(len(y_test))), y=y_test, mode='lines', name='Actual Values'))
