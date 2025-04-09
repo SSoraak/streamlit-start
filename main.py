@@ -238,5 +238,7 @@ elif page == "🔧 Predict Maintenance":
         </style>
     """, unsafe_allow_html=True)
 
-    st.subheader("Filtered Prediction Data")
+
+    st.header(f"Records for Machine: {selected_machine_type}  Issue: {selected_issue_type} Department: {selected_department_type}")
+    st.info("Prediction By Gradient Boosting Model")
     st.dataframe(display_data, use_container_width=True)
