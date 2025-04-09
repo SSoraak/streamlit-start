@@ -36,10 +36,6 @@ hide_streamlit_style = """
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# ---------------------- PAGE NAVIGATION -----------------------
-page = st.selectbox("เลือกหน้า", ["Dashboard", "Prediction"], index=0)
-
-st.markdown("<h1 style='text-align: center;'>Machinery Maintenance System</h1>", unsafe_allow_html=True)
 
 
 # แคชข้อมูล
@@ -80,8 +76,11 @@ def predict_all_data(_df, _encoder, _model):
 # ---------------------
 # Navigation
 # ---------------------
-st.title("Machinery Maintenance System")
-page = st.selectbox("เลือกหน้า", ["📊 Dashboard", "🔧 Predict Maintenance"])
+
+page = st.selectbox("เลือกหน้า", ["Dashboard", "Prediction"], index=0)
+
+st.markdown("<h1 style='text-align: center;'>Machinery Maintenance System</h1>", unsafe_allow_html=True)
+
 
 if page == "📊 Dashboard":
     st.header("📊 Dashboard Overview")
