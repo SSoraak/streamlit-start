@@ -23,14 +23,14 @@ hide_streamlit_style = """
             visibility: hidden;
         }
         .block-container {
-            padding-top: 5rem;
-            padding-bottom: 5rem;
-            padding-left: 5rem;
-            padding-right: 5rem;
+            padding-top: 4rem;
+            padding-bottom: 4rem;
+            padding-left: 4rem;
+            padding-right: 4rem;
         }
         .css-18e3th9 {
-            padding-left: 5rem !important;
-            padding-right: 5rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
         }
     </style>
 """
@@ -88,7 +88,7 @@ if page == "📊 Dashboard":
     st.header("📊 Dashboard Overview")
     dashboard_url = "https://your-dashboard-url.com"  # <== ใส่ URL dashboard จริงตรงนี้
     st.markdown(f"""
-        <iframe title="ข้อมูลเครื่องจักร MA (ธีม)" width="100%" height="740" src="https://app.powerbi.com/reportEmbed?reportId=892b0a03-c03d-41d9-a3fd-79ac05cbca3d&autoAuth=true&ctid=1f23f2e8-f8b5-4438-a7d7-1d2d87dffcf3" frameborder="0" allowFullScreen="true"></iframe>
+        <iframe title="ข้อมูลเครื่องจักร MA (ธีม)" width="100%" height="100%" src="https://app.powerbi.com/reportEmbed?reportId=892b0a03-c03d-41d9-a3fd-79ac05cbca3d&autoAuth=true&ctid=1f23f2e8-f8b5-4438-a7d7-1d2d87dffcf3" frameborder="0" allowFullScreen="true"></iframe>
     """, unsafe_allow_html=True)
 
 elif page == "🔧 Predict Maintenance":
