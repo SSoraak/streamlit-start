@@ -196,7 +196,7 @@ elif page == "🔧 Predict Maintenance":
 
     # Filter Sidebar
     st.sidebar.header("Select Model")
-    selected_model = st.sidebar.selectbox("Select Model", list(models.keys()))
+    selected_model = st.sidebar.selectbox("Select Model", list(models.keys()), index=list(models.keys()).index("Gradient Boosting")) # ตั้งค่าเริ่มต้น)
     st.sidebar.header("Filter Records")
     issue_types = ['All'] + list(df[issue_column].unique())
     selected_issue_type = st.sidebar.selectbox("Select Issue Type", issue_types)
