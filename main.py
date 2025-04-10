@@ -76,11 +76,13 @@ def predict_all_data(_df, _encoder, _model):
 # ---------------------
 # Navigation
 # ---------------------
-st.markdown("<h1 style='text-align: center;'>Machinery Maintenance </h1>", unsafe_allow_html=True)
-page = st.selectbox("เลือกหน้า", ["📊 Dashboard", "🔧 Predict Maintenance"])
+st.sidebar.header("Page Navigation")
+#st.sidebar.markdown("<h3 style='text-align: left;'>Dashboard</h3>", unsafe_allow_html=True)
+#st.sidebar.markdown("<h3 style='text-align: left;'>Predict</h3>", unsafe_allow_html=True)
+page = st.sidebar.selectbox("Select Page", ["📊 Dashboard", "🔧 Predict Maintenance"])
 
 
-
+st.markdown("<h1 style='text-align: left;'>Machinery Maintenance </h1>", unsafe_allow_html=True)
 
 
 
@@ -166,7 +168,6 @@ elif page == "🔧 Predict Maintenance":
             df[issue_column].unique()
         )
 
-
     if st.button("Predict"):
         input_data = pd.DataFrame([[machine_id, selected_department, selected_issue]], columns=[machine_id_column, department_column, issue_column])
         input_encoded = encoder.transform(input_data[[department_column, issue_column]])
@@ -176,12 +177,9 @@ elif page == "🔧 Predict Maintenance":
         for name, prediction in new_predictions.items():
             st.success(f"**{name} Prediction**: {prediction:.0f} days")
 
-    df['Predicted Maintenance Duration (days)'] = predict_all_data(df, encoder, models["Gradient Boosting"])
-    df['Predicted next date'] = pd.to_datetime(df['วันที่']) + pd.to_timedelta(df['Predicted Maintenance Duration (days)'], unit='d')
-    df['Predicted next date'] = df['Predicted next date'].dt.date
-    df = df.sort_values(by='วันที่').drop_duplicates(subset=[department_column, machine_id_column, issue_column], keep='last')
-
     # Filter Sidebar
+    st.sidebar.header("Select Model")
+    selected_model = st.sidebar.selectbox("Select Model", list(models.keys()))
     st.sidebar.header("Filter Records")
     issue_types = ['All'] + list(df[issue_column].unique())
     selected_issue_type = st.sidebar.selectbox("Select Issue Type", issue_types)
@@ -190,6 +188,24 @@ elif page == "🔧 Predict Maintenance":
     machine_options = ['All'] + list(df[machine_id_column].unique()) if selected_department_type == 'All' else ['All'] + list(df[df[department_column] == selected_department_type][machine_id_column].unique())
     selected_machine_type = st.sidebar.selectbox("Select Machine Type", machine_options)
 
+    
+    #@st.cache_data(show_spinner=False)
+    def predict_all_data(_df, _encoder, _model):
+        input_encoded = _encoder.transform(_df[[department_column, issue_column]])
+        input_encoded_df = pd.DataFrame(input_encoded, columns=encoded_feature_names)
+        input_final = pd.concat([_df[[machine_id_column]], input_encoded_df], axis=1)
+        return _model.predict(input_final).astype(int)
+
+    # คำนวณการทำนายสำหรับทุกโมเดล
+    for model_name, model in models.items():
+        df[f'Predicted ({model_name})'] = predict_all_data(df, encoder, model)
+        df[f'Next Date ({model_name})'] = pd.to_datetime(df['วันที่']) + pd.to_timedelta(df[f'Predicted ({model_name})'], unit='d')
+        df[f'Next Date ({model_name})'] = df[f'Next Date ({model_name})'].dt.date
+
+    # เรียงข้อมูลตามวันที่ล่าสุดมาก่อน
+    df = df.sort_values(by='วันที่', ascending=False)
+    
+    # กรองข้อมูลตามที่เลือกใน sidebar
     filtered_data = df.copy()
     if selected_issue_type != 'All':
         filtered_data = filtered_data[filtered_data[issue_column] == selected_issue_type]
@@ -198,19 +214,27 @@ elif page == "🔧 Predict Maintenance":
     if selected_machine_type != 'All':
         filtered_data = filtered_data[filtered_data[machine_id_column] == selected_machine_type]
 
+   # เตรียมข้อมูลสำหรับแสดงผล - ต้องทำใหม่ทุกครั้งที่เลือกโมเดล
     display_data = filtered_data.rename(columns={
         'แผนก': 'Department',
         'หมายเลขเครื่อง': 'Machine ID',
         'ปัญหา': 'Issue',
         'วันที่': 'Date',
-        'ระยะเวลาในใช้น้ำยา /แบต (วัน)': 'Actual Duration (days)',
-        'Predicted next date': 'Next Predicted Date'
+        'ระยะเวลาในใช้น้ำยา /แบต (วัน)': 'Duration (days)'
     })
-
-    display_columns = ['Department', 'Machine ID', 'Issue', 'Actual Duration (days)', 'Date', 'Next Predicted Date']
+    
+    # เลือกเฉพาะคอลัมน์ที่ต้องการแสดง
+    display_columns = ['Department', 'Machine ID', 'Issue', 'Date', 'Duration (days)', 
+                      f'Predicted ({selected_model})', f'Next Date ({selected_model})']
+    
     display_data = display_data[display_columns].reset_index(drop=True)
     display_data.index += 1
 
+    display_data = display_data.rename(columns={
+        f'Predicted ({selected_model})': 'Predicted Duration (days)',
+        f'Next Date ({selected_model})': 'Next Predicted Date'
+    })
+    
     st.markdown("""
         <style>
         .dataframe {
@@ -222,11 +246,11 @@ elif page == "🔧 Predict Maintenance":
             background-color: #4CAF50;
             color: white;
             padding: 10px;
-            text-align: center;
+            text-align: left;
         }
         .dataframe td {
             padding: 8px;
-            text-align: center;
+            text-align: left;
             border-bottom: 1px solid #ddd;
         }
         .dataframe tr:nth-child(even) {
@@ -238,7 +262,6 @@ elif page == "🔧 Predict Maintenance":
         </style>
     """, unsafe_allow_html=True)
 
-
     st.header(f"Records for Machine: {selected_machine_type}  Issue: {selected_issue_type} Department: {selected_department_type}")
-    st.info("Prediction By Gradient Boosting Model")
+    st.info(f"Prediction By: {selected_model}")
     st.dataframe(display_data, use_container_width=True)
