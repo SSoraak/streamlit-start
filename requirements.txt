@@ -1,10 +1,11 @@
 streamlit
+streamlit-nested-layout
 pandas
-scikit-learn
+scikit-learn==1.5.1
 numpy
 matplotlib
 seaborn
 statsmodels
 openpyxl
 plotly
-joblib
+joblib ==  1.4.2
