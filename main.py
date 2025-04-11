@@ -113,6 +113,7 @@ pg.run()
 page = st.sidebar.selectbox("Select Page", ["📊 Dashboard", "🔧 Predict Maintenance"])
 
 
+
 st.markdown("<h1 style='text-align: left;'>Machinery Maintenance </h1>", unsafe_allow_html=True)
 
 
