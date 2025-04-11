@@ -86,27 +86,7 @@ def predict_all_data(_df, _encoder, _model):
 # ---------------------
 # Navigation
 # ---------------------
-pages = {
-    "Pose maintenance": [
-        st.Page("pose_maintenance/dashboard_bi.py", title="Dashboard", icon="📊"),
-        st.Page("pose_maintenance/prediction.py", title="Prediction", icon="🔮")
-    ],
-    "page": [
-        st.Page("pages/1.py", title="1", icon=":material/favorite:"),
-        st.Page("pages/2.py", title="2"),
-        st.Page("pages/3.py", title="3"),
-        st.Page("pages/4.py", title="4"),
-        st.Page("pages/5.py", title="5"),  
-        st.Page("pages/6.py", title="6"),
-        st.Page("pages/7.py", title="7"),
-        st.Page("pages/8.py", title="8"),
-        st.Page("pages/9.py", title="9"),
-        
-    ]
-}
 
-pg = st.navigation(pages, position="hidden")
-pg.run()
 
 #st.sidebar.markdown("<h3 style='text-align: left;'>Dashboard</h3>", unsafe_allow_html=True)
 #st.sidebar.markdown("<h3 style='text-align: left;'>Predict</h3>", unsafe_allow_html=True)
@@ -267,3 +247,25 @@ elif page == "🔧 Predict Maintenance":
     st.header(f"Records for Machine: {selected_machine_type}  Issue: {selected_issue_type} Department: {selected_department_type}")
     st.info(f"Prediction By: {selected_model}")
     st.dataframe(display_data, use_container_width=True)
+    
+pages = {
+    "Pose maintenance": [
+        st.Page("pose_maintenance/dashboard_bi.py", title="Dashboard", icon="📊"),
+        st.Page("pose_maintenance/prediction.py", title="Prediction", icon="🔮")
+    ],
+    "page": [
+        st.Page("pages/1.py", title="1", icon=":material/favorite:"),
+        st.Page("pages/2.py", title="2"),
+        st.Page("pages/3.py", title="3"),
+        st.Page("pages/4.py", title="4"),
+        st.Page("pages/5.py", title="5"),  
+        st.Page("pages/6.py", title="6"),
+        st.Page("pages/7.py", title="7"),
+        st.Page("pages/8.py", title="8"),
+        st.Page("pages/9.py", title="9"),
+        
+    ]
+}
+
+pg = st.navigation(pages, position="hidden")
+pg.run()
