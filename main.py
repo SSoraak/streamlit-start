@@ -89,21 +89,6 @@ def predict_all_data(_df, _encoder, _model):
 # Navigation
 # ---------------------
 
-pages = {
-    "หน้า": [
-        st.Page("main.py", title="Main"),
-        st.Page("pages/1.py", title="1", icon=":material/favorite:"),
-        st.Page("pages/2.py", title="2")
-    ],
-    "Resources": [
-        st.Page("pages/3.py", title="3")
-        
-    ],
-}
-
-pg = st.navigation(pages)
-pg.run()
-st.page_link(".py", label="Home", icon="🏠")
 #st.sidebar.markdown("<h3 style='text-align: left;'>Dashboard</h3>", unsafe_allow_html=True)
 #st.sidebar.markdown("<h3 style='text-align: left;'>Predict</h3>", unsafe_allow_html=True)
 page = st.sidebar.selectbox("Select Page", ["📊 Dashboard", "🔧 Predict Maintenance"])
