@@ -7,7 +7,7 @@ from sklearn.preprocessing import OneHotEncoder
 import joblib
 
 # ====== STEP 1: LOAD DATA ======
-data_path = 'streamlit-start\สถิติ Pose Repairman.xlsx'
+data_path = r'สถิติ Pose Repairman.xlsx'
 sheet_name = 'ข้อมูลการใช้นำยา'
 df = pd.read_excel(data_path, sheet_name=sheet_name, engine='openpyxl')
 df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'] = pd.to_numeric(df['ระยะเวลาในใช้น้ำยา /แบต (วัน)'], errors='coerce')
