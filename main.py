@@ -19,9 +19,7 @@ st.set_page_config(
 # ---------------------- STYLE -----------------------
 hide_streamlit_style = """
     <style>
-        #MainMenu, header, footer {
-            visibility: hidden;
-        }
+
         .block-container {
             padding-top: 4rem;
             padding-bottom: 4rem;
