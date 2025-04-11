@@ -1,4 +1,5 @@
 streamlit
+streamlit-nested-layout
 pandas
 scikit-learn
 numpy
