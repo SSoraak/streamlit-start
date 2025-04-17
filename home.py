@@ -2,9 +2,10 @@ import streamlit as st
 
 # ---------------------- CONFIG ----------------------
 st.set_page_config(
-    page_title="Machinery Maintenance System",
+    page_title="Dobled S",
+    page_icon="assets/logo.png" , #favicon
     layout="wide",  # Full width
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="auto",  # Sidebar state: auto, expanded, or collapsed
 )
 
 # ---------------------- STYLE -----------------------
@@ -32,7 +33,7 @@ def home_content():
 # เอาไว้ที่นี่เพื่อให้สามารถเรียกใช้ได้จากทุกหน้า 
 pages = {
     "Home": [
-        st.Page(home_content, title="Home", icon="🏠"),],
+        st.Page(home_content, title="Home", icon="🏠", default= True),],
     "Pose maintenance": [
         st.Page("pose_maintenance/dashboard_bi.py", title="Dashboard", icon="📊"),
         st.Page("pose_maintenance/prediction.py", title="Prediction", icon="🔮")
@@ -43,19 +44,23 @@ pages = {
     ],
     "page": [
         st.Page("pages/1.py", title="1", icon=":material/favorite:"),
-        st.Page("pages/2.py", title="2"),
-        st.Page("pages/3.py", title="3"),
-        st.Page("pages/4.py", title="4"),
-        st.Page("pages/5.py", title="5"),  
-        st.Page("pages/6.py", title="6"),
-        st.Page("pages/7.py", title="7"),
-        st.Page("pages/8.py", title="8"),
-        st.Page("pages/9.py", title="9"),
+        st.Page("pages/2.py", title="2", icon=":material/favorite:"),
+        st.Page("pages/3.py", title="3", icon=":material/favorite:"),
+        st.Page("pages/4.py", title="4", icon=":material/favorite:"),
+        st.Page("pages/5.py", title="5", icon=":material/favorite:"),  
+        st.Page("pages/6.py", title="6", icon=":material/favorite:"),
+        st.Page("pages/7.py", title="7", icon=":material/favorite:"),
+        st.Page("pages/8.py", title="8", icon=":material/favorite:"),
+        st.Page("pages/9.py", title="9", icon=":material/favorite:"),
         
     ]
 }
 
 pg = st.navigation(pages)
+
+# all pages in the sidebar
+st.logo("assets/logo.png") 
+# st.sidebar.text("Made by 💖 Night")
 pg.run()
 
 
