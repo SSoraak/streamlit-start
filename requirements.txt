@@ -9,3 +9,5 @@ statsmodels
 openpyxl
 plotly
 joblib ==  1.4.2
+mysql-connector-python
+dateutil

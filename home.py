@@ -42,6 +42,10 @@ pages = {
         st.Page("pages/dashboard_power_bi.py", title="Dashboard (All)", icon="📊"),
         
     ],
+      "Pose Analysis": [
+        st.Page("pages/sales_phc.py", title="ข้อมูลการขาย", icon="💵"),
+        
+    ],
     "page": [
         st.Page("pages/1.py", title="1", icon=":material/favorite:"),
         st.Page("pages/2.py", title="2", icon=":material/favorite:"),

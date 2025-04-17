@@ -82,7 +82,7 @@ dashboards = [
         "description": "Linen management",
         "owner": ["Night"],
         "tags": ["Linen"],
-        "order": 1.008,
+        "order": 2.001,
         "show": True
     }, 
     {
@@ -91,7 +91,7 @@ dashboards = [
         "description": "Linen management on Praram9 hospital",
         "owner": ["Night"],
         "tags": ["Linen", "Praram9"],
-        "order": 1.009,
+        "order": 2.002,
         "show": True
     }, 
     {
@@ -100,7 +100,7 @@ dashboards = [
         "description": "Linen management",
         "owner": ["Night"],
         "tags": ["Linen", "RFID"],
-        "order": 1.009,
+        "order": 1.003,
         "show": True
     }, 
     {
@@ -109,7 +109,7 @@ dashboards = [
         "description": "Linen management on G Nimman hotel",
         "owner": ["Night"],
         "tags": ["Linen", "G Nimman"],
-        "order": 1.010,
+        "order": 2.004,
         "show": True
     }, 
     {
@@ -118,7 +118,7 @@ dashboards = [
         "description": "Project management for rama มหิดล",
         "owner": ["Night"],
         "tags": ["Linen", "ITSM"],
-        "order": 1.011,
+        "order": 3.001,
         "show": False
     }, 
     {
@@ -127,7 +127,7 @@ dashboards = [
         "description": "Instrument management for Dental",
         "owner": ["Night"],
         "tags": ["Linen", "BHQ", "Dental"],
-        "order": 1.012,
+        "order": 4.001,
         "show": True
     }, 
     {
@@ -136,7 +136,16 @@ dashboards = [
         "description": "Instrument management for Dental and CSSD",
         "owner": ["Night"],
         "tags": ["Linen", "BHQ", "Dental", "CSSD"],
-        "order": 1.013,
+        "order": 4.002,
+        "show": True
+    }, 
+        {
+        "name": "Inventory OR Sriphat",
+        "url": "https://app.powerbi.com/reportEmbed?reportId=24f931e5-b790-4a71-ab6e-57300d50d33b&autoAuth=true&ctid=1f23f2e8-f8b5-4438-a7d7-1d2d87dffcf3",
+        "description": "Instrument management for OR",
+        "owner": ["Night"],
+        "tags": [ "Inventory OR", "OR", "Sriphat"],
+        "order": 5.001,
         "show": True
     }, 
 ]
