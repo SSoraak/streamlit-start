@@ -21,6 +21,7 @@ hide_streamlit_style = """
             padding-left: 1rem !important;
             padding-right: 1rem !important;
         }
+
     </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
