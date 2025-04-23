@@ -77,6 +77,15 @@ dashboards = [
         "show": True
     }, 
     {
+        "name": "PHC Sales P071",
+        "url": "https://app.powerbi.com/reportEmbed?reportId=4b51764b-9441-4abf-b0e1-469c6c435d39&autoAuth=true&ctid=1f23f2e8-f8b5-4438-a7d7-1d2d87dffcf3",
+        "description": "PHC Sales analysis",
+        "owner": ["Night"],
+        "tags": ["Pose", "Pose Health Care", "PHC",  "P071"],
+        "order": 1.008,
+        "show": True
+    }, 
+    {
         "name": "Linen Dashboard",
         "url": "https://app.powerbi.com/reportEmbed?reportId=c6945a86-1650-453f-b5e5-e76ed69b10e6&autoAuth=true&ctid=1f23f2e8-f8b5-4438-a7d7-1d2d87dffcf3",
         "description": "Linen management",
